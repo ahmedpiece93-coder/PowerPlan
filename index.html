@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PowerPlan" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PowerPlan</title>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="title">PowerPlan</div>
+        <div class="subtitle" id="subtitle">Objectif 90 kg • Recomposition</div>
+      </div>
+      <button class="iconbtn" id="btnSettings" aria-label="Réglages" title="Réglages">⚙︎</button>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Navigation">
+      <button class="tab active" data-tab="dashboard" role="tab">Accueil</button>
+      <button class="tab" data-tab="training" role="tab">Training</button>
+      <button class="tab" data-tab="weight" role="tab">Poids</button>
+      <button class="tab" data-tab="nutrition" role="tab">Nutrition</button>
+    </nav>
+
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section class="panel active" id="tab-dashboard">
+        <div class="grid">
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Aujourd’hui</div>
+                <div class="card-sub" id="todayDate"></div>
+              </div>
+              <span class="pill" id="pillStreak">—</span>
+            </div>
+
+            <div class="kpis">
+              <div class="kpi">
+                <div class="kpi-label">Poids</div>
+                <div class="kpi-value"><span id="kpiWeight">—</span><span class="kpi-unit"> kg</span></div>
+                <div class="kpi-foot" id="kpiWeightFoot">Dernière entrée</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Protéines</div>
+                <div class="kpi-value"><span id="kpiProtein">—</span><span class="kpi-unit"> g</span></div>
+                <div class="kpi-foot">Objectif <span id="kpiProteinGoal">190</span> g</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Créatine</div>
+                <div class="kpi-value" id="kpiCreatine">—</div>
+                <div class="kpi-foot">5 g / jour</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" id="quickAddWeight">+ Poids</button>
+              <button class="btn" id="quickAddProtein">+ Protéines</button>
+              <button class="btn ghost" id="toggleCreatine">Créatine ✔</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Poids (14 jours)</div>
+                <div class="card-sub">Tendance + moyenne 7j</div>
+              </div>
+            </div>
+            <canvas id="weightChart" height="140"></canvas>
+            <div class="smallrow">
+              <div class="smallstat">
+                <div class="smallstat-label">Moyenne 7j</div>
+                <div class="smallstat-value"><span id="avg7">—</span> kg</div>
+              </div>
+              <div class="smallstat">
+                <div class="smallstat-label">Écart vs objectif</div>
+                <div class="smallstat-value"><span id="deltaGoal">—</span> kg</div>
+              </div>
+              <div class="smallstat">
+                <div class="smallstat-label">Rythme (7j)</div>
+                <div class="smallstat-value"><span id="pace7">—</span> kg/sem</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Semaine</div>
+                <div class="card-sub">4 séances: Haut A / Bas A / Haut B / Bas B</div>
+              </div>
+              <span class="pill" id="weekStatus">—</span>
+            </div>
+            <div class="week" id="weekGrid"></div>
+            <div class="hint">Astuce: coche tes séries dans “Training” pour garder la progression.</div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Checklist</div>
+                <div class="card-sub">Simple, régulier, efficace</div>
+              </div>
+            </div>
+            <div class="checklist">
+              <label class="check">
+                <input type="checkbox" id="chkSteps"/>
+                <span>8–10k pas</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" id="chkWater"/>
+                <span>2–3L d’eau</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" id="chkSleep"/>
+                <span>7–8h sommeil</span>
+              </label>
+            </div>
+            <div class="actions">
+              <button class="btn ghost" id="resetDaily">Réinitialiser (jour)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRAINING -->
+      <section class="panel" id="tab-training">
+        <div class="panelhead">
+          <div>
+            <div class="paneltitle">Training</div>
+            <div class="panelsub">Programme 4 jours • progression (RIR 1–2)</div>
+          </div>
+          <button class="btn ghost" id="btnNewSession">Nouvelle séance</button>
+        </div>
+
+        <div class="segmented" id="dayPicker" role="tablist" aria-label="Séances">
+          <button class="seg active" data-day="hautA">Haut A</button>
+          <button class="seg" data-day="basA">Bas A</button>
+          <button class="seg" data-day="hautB">Haut B</button>
+          <button class="seg" data-day="basB">Bas B</button>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-title" id="sessionTitle">Haut A</div>
+              <div class="card-sub" id="sessionMeta">Coche les séries. Ajoute tes charges.</div>
+            </div>
+            <span class="pill" id="sessionProgress">0%</span>
+          </div>
+
+          <div class="workout" id="workoutList"></div>
+
+          <div class="actions">
+            <button class="btn" id="saveSession">Sauvegarder</button>
+            <button class="btn ghost" id="finishSession">Terminer séance</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-title">Historique (7 jours)</div>
+              <div class="card-sub">Dernières séances enregistrées</div>
+            </div>
+          </div>
+          <div class="history" id="trainingHistory"></div>
+        </div>
+      </section>
+
+      <!-- WEIGHT -->
+      <section class="panel" id="tab-weight">
+        <div class="panelhead">
+          <div>
+            <div class="paneltitle">Poids</div>
+            <div class="panelsub">Entrée du matin • moyenne 7 jours</div>
+          </div>
+          <button class="btn" id="btnAddWeight">Ajouter</button>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-title">Courbe</div>
+              <div class="card-sub">30 derniers jours</div>
+            </div>
+          </div>
+          <canvas id="weightChart30" height="160"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-title">Entrées</div>
+              <div class="card-sub">Tape pour modifier, glisse pour supprimer</div>
+            </div>
+          </div>
+          <div class="list" id="weightList"></div>
+        </div>
+      </section>
+
+      <!-- NUTRITION -->
+      <section class="panel" id="tab-nutrition">
+        <div class="panelhead">
+          <div>
+            <div class="paneltitle">Nutrition</div>
+            <div class="panelsub">Protéines + habitudes (simple)</div>
+          </div>
+          <button class="btn" id="btnAddProtein">Ajouter</button>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Protéines aujourd’hui</div>
+                <div class="card-sub">Objectif <span id="proteinGoalLabel">190</span> g</div>
+              </div>
+              <span class="pill" id="proteinPill">—</span>
+            </div>
+
+            <div class="meter">
+              <div class="meterbar"><div class="meterfill" id="proteinFill"></div></div>
+              <div class="meterlabels">
+                <span>0</span><span id="proteinGoalRight">190</span>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn ghost" data-add="25">+25g</button>
+              <button class="btn ghost" data-add="30">+30g</button>
+              <button class="btn ghost" data-add="40">+40g</button>
+              <button class="btn" id="resetProtein">Reset</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Créatine</div>
+                <div class="card-sub">5 g / jour • coche quand c’est fait</div>
+              </div>
+              <span class="pill" id="creatinePill">—</span>
+            </div>
+            <div class="actions">
+              <button class="btn" id="btnCreatineToggle">Marquer comme prise</button>
+              <button class="btn ghost" id="btnCreatineReset">Reset (jour)</button>
+            </div>
+            <div class="hint">Tu peux la prendre à n’importe quel moment, l’important = tous les jours.</div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Notes</div>
+                <div class="card-sub">humeur, sommeil, faim, perfs…</div>
+              </div>
+            </div>
+            <textarea id="notes" class="textarea" rows="7" placeholder="Ex: bonne séance, +2,5kg au couché, sommeil moyen..."></textarea>
+            <div class="actions">
+              <button class="btn" id="saveNotes">Sauvegarder</button>
+              <button class="btn ghost" id="clearNotes">Effacer</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-title">Raccourcis menu</div>
+                <div class="card-sub">Exemples (tu peux personnaliser)</div>
+              </div>
+            </div>
+            <div class="chips" id="mealChips"></div>
+            <div class="hint">Ces raccourcis n’affectent que ton compteur protéines (pas de calories).</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <dialog class="modal" id="settingsModal">
+      <form method="dialog" class="modalbox">
+        <div class="modalhead">
+          <div>
+            <div class="card-title">Réglages</div>
+            <div class="card-sub">PowerPlan • PWA offline</div>
+          </div>
+          <button class="iconbtn" value="cancel" aria-label="Fermer">✕</button>
+        </div>
+
+        <div class="fields">
+          <label class="field">
+            <span>Poids objectif (kg)</span>
+            <input type="number" inputmode="decimal" id="goalWeight" min="40" max="200" step="0.1" />
+          </label>
+          <label class="field">
+            <span>Objectif protéines (g/j)</span>
+            <input type="number" inputmode="numeric" id="goalProtein" min="80" max="300" step="5" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="saveSettings" value="default">Sauvegarder</button>
+          <button class="btn ghost" id="exportData" value="default">Exporter</button>
+          <button class="btn ghost" id="importData" value="default">Importer</button>
+          <button class="btn danger" id="wipeData" value="default">Tout effacer</button>
+        </div>
+
+        <p class="hint">
+          Données stockées localement (sur ton téléphone). Export/Import = JSON.
+        </p>
+      </form>
+    </dialog>
+
+    <!-- PROMPTS -->
+    <dialog class="modal" id="promptModal">
+      <form method="dialog" class="modalbox">
+        <div class="modalhead">
+          <div>
+            <div class="card-title" id="promptTitle">Entrée</div>
+            <div class="card-sub" id="promptSub">—</div>
+          </div>
+          <button class="iconbtn" value="cancel" aria-label="Fermer">✕</button>
+        </div>
+
+        <div class="fields" id="promptFields"></div>
+
+        <div class="actions">
+          <button class="btn" id="promptOk" value="default">OK</button>
+          <button class="btn ghost" value="cancel">Annuler</button>
+        </div>
+      </form>
+    </dialog>
+
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
